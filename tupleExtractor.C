@@ -58,7 +58,7 @@ void tupleExtractor()
   bool DEBUG = false;
 
   // Provide Output File Name
-  TFile *f = new TFile("LQD_tuple.root", "NEW");
+  TFile *f = new TFile("LQD_tuple.root", "RECREATE");
 
   // Set Input Filenames in the string array
   std::vector<std::string> inputFileNames;
@@ -72,48 +72,48 @@ void tupleExtractor()
   TTree *tree = new TTree("LQDTruthTuple", "Truth0 Information");
 
   // Declare data types; must match the data type being pulled out of TRUTH0 DAOD
-  int m_eventNumber;
-  std::vector<float> m_DV_R;
-  std::vector<float> m_n1_lifetime;
+  int eventNumber;
+  std::vector<float> DV_R;
+  std::vector<float> n1_lifetime;
 
-  std::vector<int> m_nn1;
-  std::vector<int> m_ng;
+  std::vector<int> nn1;
+  std::vector<int> ng;
 
-  std::vector<int> m_njets;
-  std::vector<int> m_nbjets;
+  std::vector<int> njets;
+  std::vector<int> nbjets;
 
-  std::vector<int> m_nleptons;
-  std::vector<int> m_nelectrons;
-  std::vector<int> m_nmuons;
+  std::vector<int> nleptons;
+  std::vector<int> nelectrons;
+  std::vector<int> nmuons;
 
-  std::vector<float> m_jpt;
-  std::vector<float> m_bjpt;
+  std::vector<float> jpt;
+  std::vector<float> bjpt;
 
-  std::vector<float> m_leppt;
-  std::vector<float> m_ept;
-  std::vector<float> m_mupt;
+  std::vector<float> leppt;
+  std::vector<float> ept;
+  std::vector<float> mupt;
 
   // Initialize the branches
-  tree->Branch("EventNumber", &m_eventNumber);
-  tree->Branch("DV_R", &m_DV_R);
-  tree->Branch("n1_lifetime", &m_n1_lifetime);
+  tree->Branch("EventNumber", &eventNumber);
+  tree->Branch("DV_R", &DV_R);
+  tree->Branch("n1_lifetime", &n1_lifetime);
 
-  tree->Branch("Nn1", &m_nn1);
-  tree->Branch("Ng", &m_ng);
+  tree->Branch("Nn1", &nn1);
+  tree->Branch("Ng", &ng);
 
-  tree->Branch("Njets", &m_njets);
-  tree->Branch("Nbjets", &m_nbjets);
+  tree->Branch("Njets", &njets);
+  tree->Branch("Nbjets", &nbjets);
 
-  tree->Branch("Nleptons", &m_nleptons);
-  tree->Branch("Nelectrons", &m_nelectrons);
-  tree->Branch("Nmuons", &m_nmuons);
+  tree->Branch("Nleptons", &nleptons);
+  tree->Branch("Nelectrons", &nelectrons);
+  tree->Branch("Nmuons", &nmuons);
 
-  tree->Branch("jpt", &m_jpt);
-  tree->Branch("bjpt", &m_bjpt);
+  tree->Branch("jpt", &jpt);
+  tree->Branch("bjpt", &bjpt);
 
-  tree->Branch("leppt", &m_leppt);
-  tree->Branch("ept", &m_ept);
-  tree->Branch("mupt", &m_mupt);
+  tree->Branch("leppt", &leppt);
+  tree->Branch("ept", &ept);
+  tree->Branch("mupt", &mupt);
 
   // Loop over filenames
   for (const auto &inFileName : inputFileNames)
@@ -172,14 +172,14 @@ void tupleExtractor()
 
       vector<size_t> hard_int = {};
 
-      int num_gluinos = 0;
-      int num_neutralinos = 0;
+      int nugluinos = 0;
+      int nuneutralinos = 0;
 
-      int num_bjets = 0;
+      int nubjets = 0;
 
-      int num_leptons = 0;
-      int num_electrons = 0;
-      int num_muons = 0;
+      int nuleptons = 0;
+      int nuelectrons = 0;
+      int numuons = 0;
 
       // Check the particles produced directly from hard interactions
       if (DEBUG)
@@ -196,35 +196,39 @@ void tupleExtractor()
          */
         if ((fabs(SP->pdgId()) == 1000021) && SP->status() == 22)
         {
-          num_gluinos++;
+          nugluinos++;
         }
 
-        if ((fabs(SP->pdgId()) == 5) && SP->status() == 22)
+        if (fabs(SP->pdgId()) == 5 && SP->status() == 1)
         {
-          num_bjets++;
-          m_bjpt.push_back(SP->pt());
+          nubjets++;
+          bjpt.push_back(1e-3 * SP->pt());
+          if (!DEBUG)
+            std::cout << "The b-jet Pt is:" << SP->pt() << std::endl;
         }
 
-        if (((fabs(SP->pdgId()) >= 11) && SP->status() == 22) || ((fabs(SP->pdgId()) <= 18) && SP->status() == 22))
+        if (fabs(SP->pdgId()) >= 11 && fabs(SP->pdgId()) <= 18 && SP->status() == 1)
         {
-          num_leptons++;
-          m_leppt.push_back(SP->pt());
+          nuleptons++;
+          leppt.push_back(1e-3 * SP->pt());
         }
-        if ((fabs(SP->pdgId()) == 11) && SP->status() == 22)
+        if (fabs(SP->pdgId()) == 11 && SP->status() == 1)
         {
-          num_electrons++;
-          m_ept.push_back(SP->pt());
+          nuelectrons++;
+          ept.push_back(1e-3 * SP->pt());
+          if (!DEBUG)
+            std::cout << "The Electron Pt is:" << SP->pt() << std::endl;
         }
-        if ((fabs(SP->pdgId()) == 13) && SP->status() == 22)
+        if (fabs(SP->pdgId()) == 13 && SP->status() == 1)
         {
-          num_muons++;
-          m_mupt.push_back(SP->pt());
+          numuons++;
+          mupt.push_back(1e-3 * SP->pt());
         }
 
-        if ((fabs(SP->pdgId()) == 1000022) && SP->status() == 22)
+        if (fabs(SP->pdgId()) == 1000022 && SP->status() == 22)
         {
           hard_int.push_back(tp);
-          num_neutralinos++;
+          nuneutralinos++;
 
           if (DEBUG)
             std::cout << "pdgID: " << SP->pdgId() << ", mass: " << SP->m() / 1000. << ", decays? " << SP->hasDecayVtx() << ", status: " << SP->status() << std::endl;
@@ -233,25 +237,25 @@ void tupleExtractor()
           if (DEBUG)
             std::cout << "Decay vertex: (" << SP->decayVtx()->x() << ", " << SP->decayVtx()->y() << ", " << SP->decayVtx()->z() << ")" << std::endl;
           float decayR = sqrt(pow(((SP->prodVtx()->x()) - (SP->decayVtx()->x())), 2.) + pow(((SP->prodVtx()->y()) - (SP->decayVtx()->y())), 2.) + pow(((SP->prodVtx()->z()) - (SP->decayVtx()->x())), 2.));
-          m_DV_R.push_back(decayR);
+          DV_R.push_back(0.1 * decayR);
 
-          // Calculated in E-3 s. Multiply by 1000 to get to seconds
+          // Is in seconds, because Physics Short was used
           float lifetimeLab = (SP->decayVtx()->v4().Vect()).Mag() / (SP->p4().Beta() * SP->p4().Gamma() * TMath::C()) / 1000.;
           if (DEBUG)
             std::cout << "lifetime: " << lifetimeLab << std::endl
                       << std::endl;
           if (lifetimeLab > 0.)
-            m_n1_lifetime.push_back(lifetimeLab);
+            n1_lifetime.push_back(lifetimeLab);
         }
       } // end of loop over truth particles
 
       // Fill number of respective particles in each event
-      m_nn1.push_back(num_neutralinos);
-      m_ng.push_back(num_gluinos);
-      m_nbjets.push_back(num_bjets);
-      m_nleptons.push_back(num_leptons);
-      m_nelectrons.push_back(num_electrons);
-      m_nmuons.push_back(num_muons);
+      nn1.push_back(nuneutralinos);
+      ng.push_back(nugluinos);
+      nbjets.push_back(nubjets);
+      nleptons.push_back(nuleptons);
+      nelectrons.push_back(nuelectrons);
+      nmuons.push_back(numuons);
 
       if (DEBUG)
         std::cout << std::endl
@@ -274,7 +278,7 @@ void tupleExtractor()
         }
       }
       tree->Fill();
-      m_n1_lifetime.clear();
+      n1_lifetime.clear();
     } // end of entries loop
     inFile->Close();
   } // end of filenames loop

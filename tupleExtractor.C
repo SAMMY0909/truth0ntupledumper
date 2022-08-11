@@ -86,6 +86,9 @@ void tupleExtractor()
   std::vector<int> nelectrons;
   std::vector<int> nmuons;
 
+  std::vector<float> n1pt;
+  std::vector<float> gpt;
+
   std::vector<float> jpt;
   std::vector<float> bjpt;
 
@@ -100,6 +103,8 @@ void tupleExtractor()
 
   tree->Branch("Nn1", &nn1);
   tree->Branch("Ng", &ng);
+  tree->Branch("n1pt", &n1pt);
+  tree->Branch("gpt", &gpt);
 
   tree->Branch("Njets", &njets);
   tree->Branch("Nbjets", &nbjets);
@@ -197,6 +202,7 @@ void tupleExtractor()
         if ((fabs(SP->pdgId()) == 1000021) && SP->status() == 22)
         {
           nugluinos++;
+          gpt.push_back(1e-3 * SP->pt());
         }
 
         if (fabs(SP->pdgId()) == 5 && SP->status() == 1)
@@ -229,6 +235,7 @@ void tupleExtractor()
         {
           hard_int.push_back(tp);
           nuneutralinos++;
+          n1pt.push_back(1e-3 * SP->pt());
 
           if (DEBUG)
             std::cout << "pdgID: " << SP->pdgId() << ", mass: " << SP->m() / 1000. << ", decays? " << SP->hasDecayVtx() << ", status: " << SP->status() << std::endl;
